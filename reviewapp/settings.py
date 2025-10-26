@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'reviewapp.apps.movies',
 ]
 
 MIDDLEWARE = [
@@ -120,6 +122,41 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
+
+JPEGTRAN_COMMAND = "jpegtran -copy none -progressive -optimize -outfile '%(filename)s'.diet "\
+                   "'%(filename)s' && mv '%(filename)s.diet' '%(filename)s'"
+
+STANDARD_POST_PROCESSORS = [{'PATH': 'thumbnails.post_processors.optimize',
+                             'png_command': 'optipng -force -o3 %(filename)s',
+                             'jpg_command': JPEGTRAN_COMMAND}]
+
+THUMBNAILS = {
+    'METADATA': {
+        'PREFIX': 'thumbs',
+        'BACKEND': 'thumbnails.backends.metadata.RedisBackend',
+        'db': 2
+    },
+    'STORAGE': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage'
+    },
+    'BASE_DIR': 'thumb',
+    'SIZES': {
+        'size_90': {
+            'PROCESSORS': [
+                {'PATH': 'thumbnails.processors.resize', 'width': 90, 'height': 90, 'method': 'fill'},
+                {'PATH': 'thumbnails.processors.crop', 'width': 90, 'height': 90},
+            ],
+            'POST_PROCESSORS': STANDARD_POST_PROCESSORS
+        },
+        'size_400': {
+            'PROCESSORS': [
+                {'PATH': 'thumbnails.processors.resize', 'width': 400, 'height': 400, 'method': 'fill'},
+                {'PATH': 'thumbnails.processors.crop', 'width': 400, 'height': 400},
+            ],
+            'POST_PROCESSORS': STANDARD_POST_PROCESSORS
+        },
+    }
+}
 
 STATIC_URL = 'static/'
 
