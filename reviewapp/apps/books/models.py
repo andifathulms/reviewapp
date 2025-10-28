@@ -5,6 +5,7 @@ from django.urls import reverse
 from model_utils.choices import Choices
 from thumbnails.fields import ImageField
 
+from reviewapp.apps.metadata.models import Language, Creator, Genre, Country
 from reviewapp.core.utils import FilenameGenerator
 
 
@@ -14,14 +15,15 @@ class Book(models.Model):
     slug = models.SlugField(max_length=255, unique=True)
     isbn = models.CharField(max_length=13, unique=True, blank=True, null=True)
     image = ImageField(upload_to=FilenameGenerator(prefix='book_images'), blank=True, null=True)
-    authors = models.ManyToManyField('BookAuthor', blank=True)
+    authors = models.ManyToManyField(Creator, blank=True)
     publisher = models.CharField(max_length=100, blank=True)
     publication_year = models.PositiveIntegerField()
     publication_date = models.DateField(blank=True, null=True)
     pages = models.PositiveIntegerField(blank=True, null=True)
-    category = models.ManyToManyField('BookCategory', blank=True)
+    category = models.ManyToManyField(Genre, blank=True)
     summary = models.TextField(blank=True)
-    language = models.CharField(max_length=50, blank=True, default="English")
+    language = models.ManyToManyField(Language, blank=True)
+    country = models.ManyToManyField(Country, blank=True)
 
     class Meta:
         ordering = ['-publication_date', 'title']
@@ -127,31 +129,3 @@ class ReviewSection(models.Model):
 
     def __str__(self):
         return f"{self.review.book.title} - {self.section_type.name}"
-
-
-class BookAuthor(models.Model):
-    name = models.CharField(max_length=100)
-    bio = models.TextField(blank=True)
-    birth_date = models.DateField(blank=True, null=True)
-    photo = ImageField(upload_to=FilenameGenerator(prefix='author_photos'), blank=True, null=True)
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = "Book Author"
-        verbose_name_plural = "Book Authors"
-
-    def __str__(self):
-        return self.name
-
-
-class BookCategory(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ['name']
-        verbose_name = "Book Category"
-        verbose_name_plural = "Book Categories"
-
-    def __str__(self):
-        return self.name

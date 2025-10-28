@@ -4,6 +4,7 @@ from django.urls import reverse
 
 from thumbnails.fields import ImageField
 
+from reviewapp.apps.metadata.models import Language, Country, Genre, Creator
 from reviewapp.core.utils import FilenameGenerator
 
 
@@ -13,14 +14,14 @@ class Movie(models.Model):
     tagline = models.TextField(blank=True)
     synopsis = models.TextField(blank=True)
     image = ImageField(upload_to=FilenameGenerator(prefix='movie_images'), blank=True, null=True)
-    genre = models.ManyToManyField('MovieGenre', blank=True)
-    director = models.ManyToManyField('MovieDirector', blank=True)
+    genre = models.ManyToManyField(Genre, blank=True)
+    director = models.ManyToManyField(Creator, blank=True)
     release_year = models.PositiveIntegerField()
     runtime = models.PositiveIntegerField(help_text="Runtime in minutes")
-    language = models.ManyToManyField('MovieLanguage', blank=True)
+    language = models.ManyToManyField(Language, blank=True)
     imdb_id = models.CharField(max_length=20, blank=True, null=True, unique=True)
     release_date = models.DateField(blank=True, null=True)
-    country = models.ManyToManyField('MovieCountry', blank=True)
+    country = models.ManyToManyField(Country, blank=True)
 
     class Meta:
         ordering = ['-release_year', 'title']
@@ -101,50 +102,3 @@ class MovieAspectRating(models.Model):
 
     def __str__(self):
         return f"{self.review.movie.title} - {self.category.name}: {self.rating}"
-
-
-class MovieGenre(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    description = models.TextField(blank=True)
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
-class MovieDirector(models.Model):
-    name = models.CharField(max_length=100)
-    bio = models.TextField(blank=True)
-    birth_date = models.DateField(blank=True, null=True)
-    photo = ImageField(upload_to=FilenameGenerator(prefix='director_photos'), blank=True, null=True)
-    
-    class Meta:
-        ordering = ['name']
-    
-    def __str__(self):
-        return self.name
-
-
-class MovieLanguage(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    code = models.CharField(max_length=10, blank=True, help_text="ISO language code")
-
-    class Meta:
-        ordering = ['name']
-
-    def __str__(self):
-        return self.name
-
-
-class MovieCountry(models.Model):
-    name = models.CharField(max_length=100, unique=True)
-    code = models.CharField(max_length=5, blank=True, help_text="ISO country code")
-
-    class Meta:
-        ordering = ['name']
-        verbose_name_plural = "Movie countries"
-
-    def __str__(self):
-        return self.name
