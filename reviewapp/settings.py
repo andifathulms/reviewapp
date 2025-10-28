@@ -41,6 +41,8 @@ INSTALLED_APPS = [
     'reviewapp.apps.movies',
     'reviewapp.apps.books',
     'reviewapp.apps.metadata',
+
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
