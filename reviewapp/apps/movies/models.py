@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models import Avg
 from django.contrib.auth.models import User
 from django.urls import reverse
 
@@ -38,9 +39,7 @@ class Movie(models.Model):
 
     @property
     def average_rating(self):
-        if hasattr(self, 'review'):
-            return self.review.rating
-        return None
+        return self.reviews.aggregate(avg=Avg('overall_rating'))['avg']
 
 
 class MovieReview(models.Model):
