@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     'reviewapp.apps.movies',
+    'reviewapp.apps.books',
 ]
 
 MIDDLEWARE = [

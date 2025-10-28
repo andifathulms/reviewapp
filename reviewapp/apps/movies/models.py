@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 from thumbnails.fields import ImageField
 
@@ -8,6 +9,7 @@ from reviewapp.core.utils import FilenameGenerator
 
 class Movie(models.Model):
     title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=255, unique=True, blank=True)
     tagline = models.TextField(blank=True)
     synopsis = models.TextField(blank=True)
     image = ImageField(upload_to=FilenameGenerator(prefix='movie_images'), blank=True, null=True)
@@ -29,6 +31,9 @@ class Movie(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.release_year})"
+
+    def get_absolute_url(self):
+        return reverse('movie-detail', kwargs={'slug': self.slug})
 
     @property
     def average_rating(self):
@@ -101,10 +106,10 @@ class MovieAspectRating(models.Model):
 class MovieGenre(models.Model):
     name = models.CharField(max_length=100, unique=True)
     description = models.TextField(blank=True)
-    
+
     class Meta:
         ordering = ['name']
-    
+
     def __str__(self):
         return self.name
 
