@@ -1,12 +1,11 @@
-# reviewapp/apps/movies/views.py
 from django.http import JsonResponse, Http404
 from django.views import View
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 
 from reviewapp.apps.movies.models import Movie
-from reviewapp.apps.core.serializers import serialize_movie
-from reviewapp.apps.core.querysets import movies_queryset_for_serialization
+from reviewapp.core.serializers import serialize_movie
+from reviewapp.core.querysets import movies_queryset_for_serialization
 
 
 @method_decorator(csrf_exempt, name="dispatch")
@@ -27,7 +26,6 @@ class Index(View):
         limit = request.GET.get("limit")
 
         qs = movies_queryset_for_serialization(Movie.objects.all())
-
         if limit and limit.isdigit():
             qs = qs[:int(limit)]
 
@@ -71,9 +69,9 @@ class Details(View):
 
         data = serialize_movie(
             movie,
-            verbose=verbose,
-            include_reviews=include_reviews,
-            include_aspects=include_aspects,
+            verbose=True,
+            include_reviews=True,
+            include_aspects=True,
             reviews_limit=reviews_limit,
         )
         return JsonResponse(data, safe=False, json_dumps_params={"ensure_ascii": False})

@@ -1,14 +1,14 @@
 from django.utils.timezone import localtime
 
-from reviewapp.apps.books.models import Book, BookReview, ReviewSection
+from reviewapp.apps.books.models import Book, BookReview, ReviewSection, ReviewSectionType
 from reviewapp.apps.movies.models import Movie, MovieReview, MovieAspectRating
 from reviewapp.apps.metadata.models import Genre, Creator, Language, Country
 
 from typing import Optional
 
 
-def serialize_movie(movie: Movie, *, verbose: bool = False, include_reviews: bool = False,
-                    include_aspects: bool = False, reviews_limit: Optional[int] = 5) -> dict:
+def serialize_movie(movie: Movie, *, verbose: bool = True, include_reviews: bool = True,
+                    include_aspects: bool = True, reviews_limit: Optional[int] = 5) -> dict:
     genres = movie.genre.all()
     directors = movie.director.all()
     languages = movie.language.all()
@@ -92,13 +92,16 @@ def serialize_aspect_rating(ar: MovieAspectRating) -> dict:
         "category": {
             "id": ar.category.id,
             "name": ar.category.name,
+            "type": ar.category.get_type_display(),
             "weight": ar.category.weight,
+            "icon": ar.category.icon_name,
+            "description": ar.category.description,
         },
         "rating": ar.rating,
         "review_text": ar.review_text,
     }
 
-def serialize_movie_review(review: MovieReview, include_aspects: bool = False) -> dict:
+def serialize_movie_review(review: MovieReview, include_aspects: bool = True) -> dict:
     data = {
         "id": review.id,
         "overall_rating": review.overall_rating,
@@ -116,6 +119,7 @@ def serialize_movie_review(review: MovieReview, include_aspects: bool = False) -
         "updated": localtime(review.updated).isoformat(),
         "is_public": review.is_public,
     }
+
     if include_aspects:
         # relies on prefetch of aspect_ratings + category for efficiency
         data["aspect_ratings"] = [serialize_aspect_rating(ar) for ar in review.aspect_ratings.all()]

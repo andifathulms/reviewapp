@@ -36,7 +36,7 @@ class Genre(models.Model):
     description = models.TextField(blank=True)
 
     def __str__(self):
-        return self.name + " (" + self.get_TYPE_display() + ")"
+        return self.name + " (" + self.get_type_display() + ")"
 
 
 class Creator(models.Model):
@@ -54,4 +54,4 @@ class Creator(models.Model):
         ordering = ['name']
     
     def __str__(self):
-        return self.name + " (" + self.get_TYPE_display() + ")"
+        return self.name + " (" + self.get_type_display() + ")"

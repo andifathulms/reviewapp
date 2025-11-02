@@ -2,7 +2,9 @@ from django.db import models
 from django.db.models import Avg
 from django.contrib.auth.models import User
 from django.urls import reverse
+from django.utils.text import slugify
 
+from model_utils.choices import Choices
 from thumbnails.fields import ImageField
 
 from reviewapp.apps.metadata.models import Language, Country, Genre, Creator
@@ -30,6 +32,11 @@ class Movie(models.Model):
             models.Index(fields=['release_year']),
             models.Index(fields=['title']),
         ]
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.title)
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.title} ({self.release_year})"
@@ -83,11 +90,17 @@ class MovieReview(models.Model):
 
 class MovieReviewCategory(models.Model):
     name = models.CharField(max_length=100)
+    TYPE = Choices(
+        (1, 'critical_analysis', 'Critical Analysis'),
+        (2, 'technical_breakdown', 'Technical Breakdown'),
+    )
+    type = models.PositiveSmallIntegerField(choices=TYPE, blank=True, null=True)
     description = models.TextField(blank=True)
     weight = models.FloatField(default=1.0)
+    icon_name = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
-        return self.name
+        return self.get_type_display() + ": " + self.name
 
 
 class MovieAspectRating(models.Model):
